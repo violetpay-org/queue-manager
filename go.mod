@@ -1,3 +1,3 @@
-module github.com/macqueen01/point3-quman
+module github.com/violetpay-org/point3-quman
 
 go 1.19
