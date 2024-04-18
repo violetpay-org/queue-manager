@@ -10,7 +10,7 @@ import (
 
 func TestKafkaQueueService(t *testing.T) {
 	testQueueName, err := qmanservices.RegisterQueueName("test_queue", 1)
-	testBrokers := []string{"b-1.vpkafkacluster1.w56rpl.c3.kafka.ap-northeast-2.amazonaws.com:9092", "b-2.vpkafkacluster1.w56rpl.c3.kafka.ap-northeast-2.amazonaws.com:9092"}
+	testBrokers := []string{"localhost:9092"}
 
 	if err != nil {
 		t.Error(err)
