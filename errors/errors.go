@@ -16,6 +16,10 @@ func ErrQueueNotPrepared(queueName string) error {
 	return errors.New("Queue not prepared: " + queueName)
 }
 
+func ErrQueueNotRunning(queueName string) error {
+	return errors.New("Queue not running: " + queueName)
+}
+
 func ErrDuplicateQueue() error {
 	return errors.New("Queue already exists")
 }
