@@ -2,10 +2,12 @@ module github.com/violetpay-org/point3-quman
 
 go 1.19
 
-require github.com/IBM/sarama v1.43.1
+require (
+	github.com/IBM/sarama v1.43.1
+	github.com/asheswook/redis-queue v0.0.0-20240414090140-3779d36e907a
+)
 
 require (
-	github.com/asheswook/redis-queue v0.0.0-20240414090140-3779d36e907a // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 )
