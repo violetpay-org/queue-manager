@@ -10,8 +10,6 @@ import (
 	qmanservices "github.com/violetpay-org/point3-quman/services"
 )
 
-// If Hub is not provided, it will create a new one with the given arguments
-// Either provide a Hub or all the other arguments
 type Args struct {
 	MessageSerializer redis.RedisMessageSerializer
 	QueueName         qmanservices.QueueName
@@ -33,7 +31,7 @@ func NewQueue(args Args) (qmanservices.IQueueService, qmanservices.ILowLevelQueu
 			redis.AddBrokers(args.Brokers),
 			redis.AddRetry(3),
 			redis.AddTTL(60),
-		), // with default config
+		),
 		args.Logger,
 	)
 
