@@ -35,7 +35,7 @@ type QueueItemWithSerializer[T any] struct {
 	Serializer[T]
 }
 type Serializer[T any] interface {
-	FromJSON(jsonString string) (T, error)
+	FromJSON(jsonString string) (*T, error)
 	ToJSON(item T) (string, error)
 }
 

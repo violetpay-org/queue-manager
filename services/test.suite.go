@@ -97,7 +97,7 @@ type nestedTestObject struct {
 
 type testObjectSerializer struct{}
 
-func (s *testObjectSerializer) FromJSON(jsonString string) (testObject, error) {
+func (s *testObjectSerializer) FromJSON(jsonString string) (*testObject, error) {
 	test := testObject{}
 	nest := nestedTestObject{}
 
@@ -110,14 +110,14 @@ func (s *testObjectSerializer) FromJSON(jsonString string) (testObject, error) {
 	err := json.Unmarshal([]byte(jsonString), temp)
 
 	if err != nil {
-		return test, err
+		return nil, err
 	}
 
 	test.testField = temp.TestField
 	test.testField2 = temp.TestField2
 	nest.testField3 = temp.TestField3
 	test.testNestedField = nest
-	return test, nil
+	return &test, nil
 }
 
 func (s *testObjectSerializer) ToJSON(item testObject) (string, error) {
