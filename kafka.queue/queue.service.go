@@ -14,6 +14,7 @@ import (
 type Args struct {
 	NumOfPartitions int
 	Brokers         []string
+	PublishOnly     bool
 	Serializer      kafka.KafkaMessageSerializer
 	QueueName       qmanservices.QueueName
 	Logger          func(string)
@@ -36,6 +37,7 @@ func NewQueue(
 	hub := kafka.NewHub(
 		args.NumOfPartitions,
 		args.Serializer,
+		args.PublishOnly,
 		kafka.NewConfig(opts...), // with default config
 		args.Logger,
 	)
