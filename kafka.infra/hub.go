@@ -19,6 +19,7 @@ type Hub struct {
 	messageSerializer KafkaMessageSerializer
 	config            *Config
 	logger            func(string)
+	publishOnly       bool // whether the hub is for publishing only
 	isRunning         bool // whether the hub is running
 	isInitialized     bool // whether the hub is initialized
 }
@@ -28,12 +29,14 @@ type Hub struct {
 func NewHub(
 	maxConsumerCount int,
 	messageSerializer KafkaMessageSerializer,
+	publishOnly bool,
 	config *Config,
 	logger func(string),
 ) *Hub {
 	Hub := &Hub{
 		consumersMax:      maxConsumerCount,
 		messageSerializer: messageSerializer,
+		publishOnly:       publishOnly,
 		logger:            logger,
 		config:            config,
 	}
@@ -61,7 +64,7 @@ func (h *Hub) init() {
 		go func(index int) {
 			defer waitGroup.Done()
 
-			consumer := NewConsumer(h.availID, h.messageSerializer, h.config)
+			consumer := NewConsumer(h.availID, h.messageSerializer, h.publishOnly, h.config)
 			consumer.SetLogger(h.logger)
 
 			mutex.Lock()
@@ -128,7 +131,7 @@ func (h *Hub) MakeNewConsumer(ctx *context.Context) *Consumer {
 
 	defer mutex.Unlock()
 
-	consumer := NewConsumer(h.availID, h.messageSerializer, h.config)
+	consumer := NewConsumer(h.availID, h.messageSerializer, h.publishOnly, h.config)
 	mutex.Lock()
 	h.consumers[consumer.id] = consumer
 	return consumer

@@ -24,6 +24,7 @@ func TestConsumerAndProducer(t *testing.T) {
 	hub := kafka.NewHub(
 		1,
 		&TestKafkaMessageSerializer{},
+		false,
 		config,
 		func(msg string) {
 			fmt.Println(msg)

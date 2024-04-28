@@ -21,6 +21,7 @@ type Consumer struct {
 	messageSerializer KafkaMessageSerializer
 	conf              *Config
 	logger            func(string)
+	publishOnly       bool
 
 	// Status
 	paused   chan bool
@@ -30,33 +31,34 @@ type Consumer struct {
 func NewConsumer(
 	availIdChan chan int,
 	messageSerializer KafkaMessageSerializer,
+	publishOnly bool,
 	conf *Config,
 ) (consumer *Consumer) {
 	consumer = &Consumer{}
 	consumer.messageSerializer = messageSerializer
 	consumer.conf = conf
+	consumer.publishOnly = publishOnly
 	consumer.init(availIdChan)
 	return
 }
 
-func (c *Consumer) init(availIdChan chan int) {
-	conn, err := sarama.NewClient(c.conf.Brokers, c.conf.Conf)
+func (c *Consumer) setupProducer() error {
+	producer, err := sarama.NewAsyncProducerFromClient(c.connection)
+
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	c.idleIdChan = availIdChan
+	c.saramaProducer = producer
+	return nil
+}
 
-	c.connection = conn
-	consumer, createConsumerErr := sarama.NewConsumerFromClient(conn)
-	producer, createProducerErr := sarama.NewAsyncProducerFromClient(conn)
+func (c *Consumer) setupConsumer() error {
+	consumer, err := sarama.NewConsumerFromClient(c.connection)
 
-	if (createConsumerErr != nil) || (createProducerErr != nil) {
-		panic(err)
+	if err != nil {
+		return err
 	}
-
-	// Wait for available consumer id
-	c.id = <-c.idleIdChan
 
 	consumePartition, err := consumer.ConsumePartition(
 		c.conf.Topic,
@@ -65,12 +67,54 @@ func (c *Consumer) init(availIdChan chan int) {
 	)
 
 	if err != nil {
-		c.idleIdChan <- c.id
-		panic(err)
+		return err
 	}
 
 	c.saramaConsumer = &consumePartition
-	c.saramaProducer = producer
+	return nil
+}
+
+// Sets up conn with available id. Returns a function that revokes the given id and connection.
+func (c *Consumer) setupConnection(availIdChan chan int) (revokeConn func(), err error) {
+	conn, err := sarama.NewClient(c.conf.Brokers, c.conf.Conf)
+
+	if err != nil {
+		return nil, err
+	}
+
+	c.connection = conn
+	c.idleIdChan = availIdChan
+	c.id = <-c.idleIdChan
+
+	revokeConn = func() {
+		c.idleIdChan <- c.id
+		c.connection.Close()
+	}
+
+	return revokeConn, nil
+}
+
+func (c *Consumer) init(availIdChan chan int) {
+
+	revokeConn, err := c.setupConnection(availIdChan)
+	if err != nil {
+		panic(err)
+	}
+
+	if !c.publishOnly {
+		err = c.setupConsumer()
+	}
+
+	if err != nil {
+		revokeConn()
+		panic(err)
+	}
+
+	if err := c.setupProducer(); err != nil {
+		revokeConn()
+		panic(err)
+	}
+
 	c.paused = make(chan bool)
 	c.isClosed = false
 	c.logger = func(string) {
@@ -83,36 +127,44 @@ func (c *Consumer) SetLogger(logger func(string)) {
 }
 
 func (c *Consumer) GetConsumer() *sarama.PartitionConsumer {
+	if c.connection == nil {
+		panic("Connection is not established")
+	}
+
 	if c.saramaConsumer == nil {
-		panic("Consumer is not initialized")
+		c.logger("Consumer is not initialized")
 	}
 
 	if c.isClosed {
-		panic("Consumer is closed")
+		c.logger("Consumer is closed")
 	}
 
 	return c.saramaConsumer
 }
 
 func (c *Consumer) GetConnection() sarama.Client {
-	if c.saramaConsumer == nil {
-		panic("Consumer is not initialized")
+	if c.connection == nil {
+		panic("Connnection is not established")
 	}
 
 	if c.isClosed {
-		panic("Consumer is closed")
+		panic("Connection is closed")
 	}
 
 	return c.connection
 }
 
 func (c *Consumer) GetProducer() sarama.AsyncProducer {
-	if c.saramaConsumer == nil {
-		panic("Consumer is not initialized")
+	if c.connection == nil {
+		panic("Connnection is not established")
+	}
+
+	if c.saramaProducer == nil {
+		c.logger("Producer is not initialized")
 	}
 
 	if c.isClosed {
-		panic("Consumer is closed")
+		c.logger("Connection is closed")
 	}
 
 	return c.saramaProducer
@@ -171,9 +223,7 @@ func (c *Consumer) StartConsume(
 	waitGroup *sync.WaitGroup,
 	context *context.Context,
 ) (_, consumeError error) {
-	if c.saramaConsumer == nil {
-		panic("Consumer is not initialized")
-	}
+	fmt.Println("[INFO] Consumer", c.id, "started")
 
 	if c.isClosed {
 		panic("Consumer is closed")
@@ -183,18 +233,24 @@ func (c *Consumer) StartConsume(
 	defer callback.OnStop(c.id) // after the consumer is stopped
 	defer c.stop()              // when the consumer is stopped
 
-	fmt.Println("[INFO] Consumer", c.id, "started")
-
 	ctx := *context
-	saramaConsumer := *c.saramaConsumer
 
+	if c.publishOnly {
+		for {
+			select {
+			case <-(*context).Done():
+				go c.Pause()
+			case <-c.paused:
+				c.close()
+				close(c.paused)
+				return nil, nil
+			}
+		}
+	}
+
+	saramaConsumer := *c.saramaConsumer
 	for {
 		select {
-		/*
-			case <-timeOut:
-				go c.Pause()
-				consumeError = fmt.Errorf("Consumer %d is paused because of timeout", c.id)
-		*/
 		case <-ctx.Done():
 			go c.Pause()
 		case err := <-saramaConsumer.Errors():
@@ -223,11 +279,11 @@ func (c *Consumer) StartConsume(
 // Pause is a function that pauses consuming messages.
 func (c *Consumer) Pause() {
 	if c.saramaConsumer == nil {
-		panic("Consumer is not initialized")
+		return
 	}
 
 	if c.isClosed {
-		panic("Consumer is closed")
+		return
 	}
 	// to pause the consumer working on StartConsume()
 	c.paused <- true
@@ -236,21 +292,38 @@ func (c *Consumer) Pause() {
 // close is a function that closes the consumer.
 // when consumer is paused, this function is called.
 func (c *Consumer) close() {
-	closeConsumerErr := (*c.saramaConsumer).Close()
-	closeProducerErr := c.saramaProducer.Close()
-	closeConnectionErr := c.connection.Close()
-
-	if closeConsumerErr != nil {
-		c.logger(closeConsumerErr.Error())
+	if c.isClosed {
+		return
 	}
 
-	if closeProducerErr != nil {
-		c.logger(closeProducerErr.Error())
+	if !c.publishOnly {
+		if err := c.closeConsumer(); err != nil {
+			c.logger(err.Error())
+		}
 	}
 
-	if closeConnectionErr != nil {
-		c.logger(closeConnectionErr.Error())
+	if err := c.closeProducer(); err != nil {
+		c.logger(err.Error())
 	}
+
+	if err := c.connection.Close(); err != nil {
+		c.logger(err.Error())
+	}
+}
+
+func (c *Consumer) closeConsumer() error {
+	if c.saramaConsumer == nil {
+		return nil
+	}
+
+	return (*c.saramaConsumer).Close()
+}
+func (c *Consumer) closeProducer() error {
+	if c.saramaProducer == nil {
+		return nil
+	}
+
+	return c.saramaProducer.Close()
 }
 
 // Stop is a function that stops consuming messages from Kafka.
