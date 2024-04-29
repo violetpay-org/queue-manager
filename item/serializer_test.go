@@ -1,13 +1,12 @@
-package kafqueue_test
+package item_test
 
 import (
+	"github.com/IBM/sarama"
+	"github.com/violetpay-org/queuemanager/config"
+	"github.com/violetpay-org/queuemanager/item"
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/IBM/sarama"
-	kafqueue "github.com/violetpay-org/point3-quman/kafka.queue"
-	qmanservices "github.com/violetpay-org/point3-quman/services"
 )
 
 type testItem struct {
@@ -15,9 +14,9 @@ type testItem struct {
 }
 
 func TestOpenBankingKafkaMessageSerializer(t *testing.T) {
-	serializer := kafqueue.NewSerializer(reflect.TypeOf(testItem{}))
-	queueItem := qmanservices.MakeQueueItem(testItem{Item: "test"})
-	testQueueName, err := qmanservices.RegisterQueueName("test", 0)
+	serializer := item.NewKafkaSerializer(reflect.TypeOf(testItem{}))
+	queueItem := item.MakeQueueItem(testItem{Item: "test"})
+	testQueueName, err := config.RegisterQueueName("test", 0)
 
 	if err != nil {
 		t.Error(err)

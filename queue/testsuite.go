@@ -1,24 +1,23 @@
-package qmanservices
+package queue
 
 import (
 	"context"
 	"encoding/json"
+	"github.com/violetpay-org/queuemanager/item"
 	"sync"
 	"testing"
 	"time"
-
-	qmanitem "github.com/violetpay-org/point3-quman/item"
 )
 
-// Test suite for successful queue service operations
+// ServiceTestSuite for successful queue service operations
 // This test suite checks whether an item can be passed to the queue service
 // and whether this item can be retrieved from the queue service
-func QueueServiceTestSuite(
+func ServiceTestSuite(
 	t *testing.T,
-	queueService IQueueService,
+	queueService Service,
 	queueOperator ILowLevelQueueOperator,
 ) {
-	queueItem := qmanitem.NewTestQueueItem()
+	queueItem := item.NewTestQueueItem()
 
 	wg := sync.WaitGroup{}
 	context := context.Background()
@@ -51,37 +50,6 @@ func QueueServiceTestSuite(
 
 	if err != nil {
 		t.Errorf("Error stopping the queue: %v", err)
-	}
-}
-
-// Test suite for queue item maker operations
-func QueueItemMakerServiceTest(t *testing.T) {
-	testItem := testObject{
-		testField:  "test",
-		testField2: 1,
-		testNestedField: nestedTestObject{
-			testField3: "nested",
-		},
-	}
-
-	serializer := testObjectSerializer{} // Update the type to match the inferred type
-
-	queueItem := MakeQueueItemWithSerializer[testObject](testItem, &serializer)
-
-	jsonMadeByQueueItem, err := queueItem.QueueItemToJSON()
-
-	if err != nil {
-		t.Errorf("Error converting item to JSON: %v", err)
-	}
-
-	jsonMadeBySerializer, err := serializer.ToJSON(testItem)
-
-	if err != nil {
-		t.Errorf("Error converting item to JSON: %v", err)
-	}
-
-	if jsonMadeByQueueItem != jsonMadeBySerializer {
-		t.Errorf("JSONs are not equal")
 	}
 }
 
@@ -145,7 +113,7 @@ type consumptionTestCallback struct {
 	consumed bool
 }
 
-func (c *consumptionTestCallback) OnConsumed(queueItem qmanitem.IQueueItem) {
+func (c *consumptionTestCallback) OnConsumed(queueItem item.Universal) {
 	if queueItem == nil {
 		c.t.Errorf("Expected an item, but received nil")
 	}

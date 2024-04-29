@@ -1,16 +1,14 @@
-package qmanservices
+package item
 
 import (
 	"encoding/json"
-
-	qmanitem "github.com/violetpay-org/point3-quman/item"
 )
 
 type BaseQueueItem struct {
 	OriginalQueueItem interface{}
 }
 
-func MakeQueueItem(item interface{}) qmanitem.IQueueItem {
+func MakeQueueItem(item interface{}) Universal {
 	return &BaseQueueItem{
 		OriginalQueueItem: item,
 	}
@@ -34,12 +32,13 @@ type QueueItemWithSerializer[T any] struct {
 	OriginalQueueItem T
 	Serializer[T]
 }
+
 type Serializer[T any] interface {
 	FromJSON(jsonString string) (*T, error)
 	ToJSON(item T) (string, error)
 }
 
-func MakeQueueItemWithSerializer[T any](item T, serializer Serializer[T]) qmanitem.IQueueItem {
+func MakeQueueItemWithSerializer[T any](item T, serializer Serializer[T]) Universal {
 	return &QueueItemWithSerializer[T]{
 		OriginalQueueItem: item,
 		Serializer:        serializer,

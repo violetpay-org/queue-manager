@@ -2,13 +2,13 @@ package kafka
 
 import (
 	"context"
+	"github.com/violetpay-org/queuemanager/config"
+	"github.com/violetpay-org/queuemanager/internal/queueerror"
+	"github.com/violetpay-org/queuemanager/item"
+	"github.com/violetpay-org/queuemanager/queue"
 	"math/rand"
 	"sync"
 	"time"
-
-	qmanErr "github.com/violetpay-org/point3-quman/errors"
-	qmanitem "github.com/violetpay-org/point3-quman/item"
-	qmanservices "github.com/violetpay-org/point3-quman/services"
 )
 
 // Hub is a struct that contains all the consumers.
@@ -16,35 +16,45 @@ type Hub struct {
 	consumers         map[int]*Consumer // map of consumer id to consumer
 	availID           chan int          // channel of available consumer ids
 	consumersMax      int               // maximum number of consumers
-	messageSerializer KafkaMessageSerializer
-	config            *Config
+	messageSerializer item.KafkaSerializer
+	config            *config.KafkaConfig
 	logger            func(string)
 	publishOnly       bool // whether the hub is for publishing only
 	isRunning         bool // whether the hub is running
 	isInitialized     bool // whether the hub is initialized
 }
 
-// NewHub is a function that returns a new Hub.
-// maxConsumerCount is the maximum number of consumers that can be created.
 func NewHub(
 	maxConsumerCount int,
-	messageSerializer KafkaMessageSerializer,
+	messageSerializer item.KafkaSerializer,
 	publishOnly bool,
-	config *Config,
+	config *config.KafkaConfig,
 	logger func(string),
 ) *Hub {
-	Hub := &Hub{
-		consumersMax:      maxConsumerCount,
-		messageSerializer: messageSerializer,
-		publishOnly:       publishOnly,
-		logger:            logger,
-		config:            config,
-	}
-	Hub.init()
-	return Hub
+	hub := &Hub{}
+	hub.Init(
+		maxConsumerCount,
+		messageSerializer,
+		publishOnly,
+		config,
+		logger,
+	)
+
+	return hub
 }
 
-func (h *Hub) init() {
+func (h *Hub) Init(
+	maxConsumerCount int,
+	messageSerializer item.KafkaSerializer,
+	publishOnly bool,
+	config *config.KafkaConfig,
+	logger func(string),
+) {
+	h.consumersMax = maxConsumerCount
+	h.messageSerializer = messageSerializer
+	h.publishOnly = publishOnly
+	h.config = config
+	h.logger = logger
 
 	if h.isInitialized {
 		return
@@ -138,7 +148,7 @@ func (h *Hub) MakeNewConsumer(ctx *context.Context) *Consumer {
 }
 
 func (h *Hub) StartConsumeAll(
-	callback qmanservices.QueueConsumeCallback,
+	callback queue.ConsumeCallback,
 	waitGroup *sync.WaitGroup,
 	ctx *context.Context,
 ) {
@@ -155,12 +165,12 @@ func (h *Hub) StartConsumeAll(
 }
 
 func (h *Hub) SendMessage(
-	item qmanitem.IQueueItem,
+	item item.Universal,
 	topic string,
 	consumerId int,
 ) error {
 	if !h.isRunning {
-		return qmanErr.ErrQueueNotPrepared(topic)
+		return queueerror.ErrQueueNotPrepared(topic)
 	}
 
 	mutex := sync.Mutex{}

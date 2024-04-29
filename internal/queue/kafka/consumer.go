@@ -3,11 +3,12 @@ package kafka
 import (
 	"context"
 	"fmt"
+	"github.com/violetpay-org/queuemanager/config"
+	"github.com/violetpay-org/queuemanager/item"
+	"github.com/violetpay-org/queuemanager/queue"
 	"sync"
 
 	"github.com/IBM/sarama"
-	qmanitem "github.com/violetpay-org/point3-quman/item"
-	qmanservices "github.com/violetpay-org/point3-quman/services"
 )
 
 // This Consumer is used to consume "Purchase" messages from Kafka.
@@ -18,8 +19,8 @@ type Consumer struct {
 	connection        sarama.Client
 	id                int
 	idleIdChan        chan int
-	messageSerializer KafkaMessageSerializer
-	conf              *Config
+	messageSerializer item.KafkaSerializer
+	conf              *config.KafkaConfig
 	logger            func(string)
 	publishOnly       bool
 
@@ -30,9 +31,9 @@ type Consumer struct {
 
 func NewConsumer(
 	availIdChan chan int,
-	messageSerializer KafkaMessageSerializer,
+	messageSerializer item.KafkaSerializer,
 	publishOnly bool,
-	conf *Config,
+	conf *config.KafkaConfig,
 ) (consumer *Consumer) {
 	consumer = &Consumer{}
 	consumer.messageSerializer = messageSerializer
@@ -173,7 +174,7 @@ func (c *Consumer) GetProducer() sarama.AsyncProducer {
 // SendMessage is a function that sends a message to Kafka.
 // This function is used when the message itself is important.
 // Use this function when you need to know if the message is sent.
-func (c *Consumer) SendMessage(item qmanitem.IQueueItem, Topic string) error {
+func (c *Consumer) SendMessage(item item.Universal, Topic string) error {
 	mutex := sync.Mutex{}
 
 	defer mutex.Unlock()
@@ -202,7 +203,7 @@ func (c *Consumer) SendMessage(item qmanitem.IQueueItem, Topic string) error {
 // FastSendMessage is a function that sends a message to Kafka without waiting for the result.
 // This function is used when the message itself is not important. (e.g. logging, testing...)
 // Use with caution because this function does not guarantee that the message is sent.
-func (c *Consumer) FastSendMessage(item qmanitem.IQueueItem, Topic string) error {
+func (c *Consumer) FastSendMessage(item item.Universal, Topic string) error {
 	producer := c.GetProducer()
 	message, err := c.messageSerializer.QueueItemToProducerMessage(item, Topic)
 
@@ -219,7 +220,7 @@ func (c *Consumer) FastSendMessage(item qmanitem.IQueueItem, Topic string) error
 // next is a callback function that is called when a message is consumed.
 // callback is a callback function that is called when the consumer is stopped.
 func (c *Consumer) StartConsume(
-	callback qmanservices.QueueConsumeCallback,
+	callback queue.ConsumeCallback,
 	waitGroup *sync.WaitGroup,
 	context *context.Context,
 ) (_, consumeError error) {

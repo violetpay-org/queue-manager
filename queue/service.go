@@ -1,17 +1,17 @@
-package qmanservices
+package queue
 
 import (
 	"context"
+	"github.com/violetpay-org/queuemanager/config"
+	"github.com/violetpay-org/queuemanager/item"
 	"sync"
-
-	qmanitem "github.com/violetpay-org/point3-quman/item"
 )
 
-type IQueueService interface {
-	GetQueueName() QueueName
+type Service interface {
+	GetQueueName() config.QueueName
 
 	PushToTheQueue(
-		item qmanitem.IQueueItem,
+		item item.Universal,
 	) error
 }
 
@@ -19,15 +19,15 @@ type IQueueService interface {
 // Through this interface, it is possible to run or stop some crucial operations.
 type ILowLevelQueueOperator interface {
 	StopQueue(
-		callback QueueStopCallback,
+		callback StopCallback,
 	) error
 
 	StartQueue(
-		onConsume QueueConsumeCallback,
+		onConsume ConsumeCallback,
 		waitGroup *sync.WaitGroup,
 		ctx *context.Context,
 	) error
 
 	// This behavior is repeated IQueueService.PushToTheQueue
-	InsertMessage(item qmanitem.IQueueItem) error
+	InsertMessage(item item.Universal) error
 }

@@ -3,17 +3,18 @@ package redis
 import (
 	"context"
 	"fmt"
+	"github.com/redis/go-redis/v9"
+	"github.com/violetpay-org/queuemanager/config"
+	"github.com/violetpay-org/queuemanager/item"
+	"github.com/violetpay-org/queuemanager/queue"
 	"sync"
 
-	redis_queue "github.com/asheswook/redis-queue"
-	redis_core "github.com/redis/go-redis/v9"
-	qmanitem "github.com/violetpay-org/point3-quman/item"
-	qmanservices "github.com/violetpay-org/point3-quman/services"
+	redisqueue "github.com/asheswook/redis-queue"
 )
 
 type Hub struct {
-	messageSerializer RedisMessageSerializer
-	cluster           *redis_queue.SafeQueue
+	messageSerializer item.RedisSerializer
+	cluster           *redisqueue.SafeQueue
 	logger            func(string)
 	paused            chan bool
 	isRunning         bool
@@ -21,18 +22,40 @@ type Hub struct {
 }
 
 func NewHub(
-	messageSerializer RedisMessageSerializer,
-	config *Config,
+	messageSerializer item.RedisSerializer,
+	config *config.RedisConfig,
 	logger func(string),
 ) *Hub {
-	client := redis_core.NewClusterClient(
-		&redis_core.ClusterOptions{
+	hub := &Hub{
+		paused:     make(chan bool),
+		isRunning:  false,
+		isPrepared: false,
+	}
+	hub.init(
+		messageSerializer,
+		config,
+		logger,
+	)
+
+	return hub
+}
+
+func (h *Hub) init(
+	messageSerializer item.RedisSerializer,
+	config *config.RedisConfig,
+	logger func(string),
+) {
+	h.messageSerializer = messageSerializer
+	h.logger = logger
+
+	client := redis.NewClusterClient(
+		&redis.ClusterOptions{
 			Addrs: config.Addrs,
 		},
 	)
 
-	queueWrapper := redis_queue.NewSafeQueue(
-		&redis_queue.Config{
+	queueWrapper := redisqueue.NewSafeQueue(
+		&redisqueue.Config{
 			Redis: client,
 			Queue: struct {
 				Name  string
@@ -51,18 +74,9 @@ func NewHub(
 		},
 	)
 
-	hub := &Hub{
-		messageSerializer: messageSerializer,
-		logger:            logger,
-		cluster:           queueWrapper,
-		paused:            make(chan bool),
-		isRunning:         false,
-		isPrepared:        false,
-	}
+	h.cluster = queueWrapper
 
-	hub.isPrepared = true
-
-	return hub
+	h.isPrepared = true
 }
 
 func (h *Hub) IsRunning() bool {
@@ -73,7 +87,7 @@ func (h *Hub) IsPrepared() bool {
 	return h.isPrepared
 }
 
-func (h *Hub) SendMessage(item qmanitem.IQueueItem) error {
+func (h *Hub) SendMessage(item item.Universal) error {
 
 	message, err := h.messageSerializer.QueueItemToRedisMessage(item)
 
@@ -85,7 +99,7 @@ func (h *Hub) SendMessage(item qmanitem.IQueueItem) error {
 }
 
 func (h *Hub) StartConsumeAll(
-	onConsume qmanservices.QueueConsumeCallback,
+	onConsume queue.ConsumeCallback,
 	waitGroup *sync.WaitGroup,
 	ctx *context.Context,
 ) {

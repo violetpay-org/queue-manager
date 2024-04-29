@@ -4,24 +4,26 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/violetpay-org/queuemanager"
+	"github.com/violetpay-org/queuemanager/config"
+	"github.com/violetpay-org/queuemanager/internal/queue/kafka"
+	"github.com/violetpay-org/queuemanager/item"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/IBM/sarama"
-	qmanitem "github.com/violetpay-org/point3-quman/item"
-	"github.com/violetpay-org/point3-quman/kafka.infra"
 )
 
 func TestConsumerAndProducer(t *testing.T) {
 	ctx := context.Background()
 
-	config := kafka.NewConfig(
-		kafka.SetTopic(kafka.TestQueueName),
-		kafka.AddBrokers(kafka.TestBrokers),
+	config := config.NewKafkaConfig(
+		config.SetKafkaTopic(config.TestKafkaQueueName),
+		config.AddKafkaBrokers(config.TestKafkaBrokers),
 	)
 
-	hub := kafka.NewHub(
+	hub := queuemanager.NewKafkaHub(
 		1,
 		&TestKafkaMessageSerializer{},
 		false,
@@ -80,7 +82,7 @@ func (q *TestQueueItem) QueueItemToString() (string, error) {
 type TestKafkaMessageSerializer struct{}
 
 func (p *TestKafkaMessageSerializer) QueueItemToProducerMessage(
-	item qmanitem.IQueueItem,
+	item item.Universal,
 	topic string,
 ) (*sarama.ProducerMessage, error) {
 	parsedItem, err := item.QueueItemToJSON()
@@ -99,7 +101,7 @@ func (p *TestKafkaMessageSerializer) QueueItemToProducerMessage(
 
 func (p *TestKafkaMessageSerializer) ConsumerMessageToQueueItem(
 	message *sarama.ConsumerMessage,
-) (qmanitem.IQueueItem, error) {
+) (item.Universal, error) {
 
 	purchaseQueueItem := &TestQueueItem{}
 
@@ -122,7 +124,7 @@ type TestKafkaConsumeCallback struct {
 
 // TestKafkaConsumeCallback
 // Used to test the consumer when it consumes a message
-func (s *TestKafkaConsumeCallback) OnConsumed(message qmanitem.IQueueItem) {
+func (s *TestKafkaConsumeCallback) OnConsumed(message item.Universal) {
 	s.t.Run("KafkaConsumeMessageTest", func(t *testing.T) {
 
 		value, err := message.QueueItemToString()

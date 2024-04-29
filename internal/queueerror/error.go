@@ -1,8 +1,6 @@
-package qmanErr
+package queueerror
 
-import (
-	"errors"
-)
+import "errors"
 
 func ErrQueueFactoryWaitGroupNil() error {
 	return errors.New("WaitGroup is nil")

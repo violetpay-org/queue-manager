@@ -1,7 +1,7 @@
-package qmanservices
+package config
 
 import (
-	qmanErr "github.com/violetpay-org/point3-quman/errors"
+	"github.com/violetpay-org/queuemanager/internal/queueerror"
 )
 
 // QueueName is an enumeration of the different queues that the service can use.
@@ -11,11 +11,11 @@ type QueueName int
 
 var (
 	// map of int to string
-	queue_names map[int]string = make(map[int]string)
+	queueNames map[int]string = make(map[int]string)
 )
 
 func (q QueueName) String() string {
-	name, _ := queue_names[int(q)]
+	name, _ := queueNames[int(q)]
 	return name
 }
 
@@ -24,10 +24,10 @@ func (q QueueName) GetQueueName() string {
 }
 
 func RegisterQueueName(name string, index int) (QueueName, error) {
-	if _, ok := queue_names[index]; !ok {
-		queue_names[index] = name
+	if _, ok := queueNames[index]; !ok {
+		queueNames[index] = name
 		return QueueName(index), nil
 	}
 
-	return QueueName(0), qmanErr.ErrDuplicateQueueName()
+	return QueueName(0), queueerror.ErrDuplicateQueueName()
 }
