@@ -1,4 +1,4 @@
-module github.com/violetpay-org/point3-quman
+module github.com/violetpay-org/queuemanager
 
 go 1.19
 
