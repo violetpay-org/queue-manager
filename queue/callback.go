@@ -1,9 +1,9 @@
-package queue
+package innerqueue
 
 import "github.com/violetpay-org/queuemanager/item"
 
 type ConsumeCallback interface {
-	OnConsumed(item item.Universal)
+	OnConsumed(item queueitem.Universal)
 	OnStop(int) // ?
 }
 

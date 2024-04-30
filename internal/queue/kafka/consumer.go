@@ -19,8 +19,8 @@ type Consumer struct {
 	connection        sarama.Client
 	id                int
 	idleIdChan        chan int
-	messageSerializer item.KafkaSerializer
-	conf              *config.KafkaConfig
+	messageSerializer queueitem.KafkaSerializer
+	conf              *queuemanagerconfig.KafkaConfig
 	logger            func(string)
 	publishOnly       bool
 
@@ -31,9 +31,9 @@ type Consumer struct {
 
 func NewConsumer(
 	availIdChan chan int,
-	messageSerializer item.KafkaSerializer,
+	messageSerializer queueitem.KafkaSerializer,
 	publishOnly bool,
-	conf *config.KafkaConfig,
+	conf *queuemanagerconfig.KafkaConfig,
 ) (consumer *Consumer) {
 	consumer = &Consumer{}
 	consumer.messageSerializer = messageSerializer
@@ -174,7 +174,7 @@ func (c *Consumer) GetProducer() sarama.AsyncProducer {
 // SendMessage is a function that sends a message to Kafka.
 // This function is used when the message itself is important.
 // Use this function when you need to know if the message is sent.
-func (c *Consumer) SendMessage(item item.Universal, Topic string) error {
+func (c *Consumer) SendMessage(item queueitem.Universal, Topic string) error {
 	mutex := sync.Mutex{}
 
 	defer mutex.Unlock()
@@ -203,7 +203,7 @@ func (c *Consumer) SendMessage(item item.Universal, Topic string) error {
 // FastSendMessage is a function that sends a message to Kafka without waiting for the result.
 // This function is used when the message itself is not important. (e.g. logging, testing...)
 // Use with caution because this function does not guarantee that the message is sent.
-func (c *Consumer) FastSendMessage(item item.Universal, Topic string) error {
+func (c *Consumer) FastSendMessage(item queueitem.Universal, Topic string) error {
 	producer := c.GetProducer()
 	message, err := c.messageSerializer.QueueItemToProducerMessage(item, Topic)
 
@@ -220,7 +220,7 @@ func (c *Consumer) FastSendMessage(item item.Universal, Topic string) error {
 // next is a callback function that is called when a message is consumed.
 // callback is a callback function that is called when the consumer is stopped.
 func (c *Consumer) StartConsume(
-	callback queue.ConsumeCallback,
+	callback innerqueue.ConsumeCallback,
 	waitGroup *sync.WaitGroup,
 	context *context.Context,
 ) (_, consumeError error) {

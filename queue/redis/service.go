@@ -11,25 +11,25 @@ import (
 )
 
 type Args struct {
-	MessageSerializer item.RedisSerializer
-	QueueName         config.QueueName
+	MessageSerializer queueitem.RedisSerializer
+	QueueName         queuemanagerconfig.QueueName
 	Logger            func(string)
 	Brokers           []string
 }
 
 type Service struct {
 	Hub       *redis.Hub
-	queueName config.QueueName
+	queueName queuemanagerconfig.QueueName
 }
 
 func NewQueue(args Args) (*Service, *Service, error) {
 	hub := redis.NewHub(
 		args.MessageSerializer,
-		config.NewRedisConfig(
-			config.SetRedisQueueName(args.QueueName.GetQueueName()),
-			config.AddRedisBrokers(args.Brokers),
-			config.AddRedisRetry(3),
-			config.AddRedisTTL(60),
+		queuemanagerconfig.NewRedisConfig(
+			queuemanagerconfig.SetRedisQueueName(args.QueueName.GetQueueName()),
+			queuemanagerconfig.AddRedisBrokers(args.Brokers),
+			queuemanagerconfig.AddRedisRetry(3),
+			queuemanagerconfig.AddRedisTTL(60),
 		),
 		args.Logger,
 	)
@@ -42,12 +42,12 @@ func NewQueue(args Args) (*Service, *Service, error) {
 	return queueService, queueService, nil
 }
 
-func (s *Service) GetQueueName() config.QueueName {
+func (s *Service) GetQueueName() queuemanagerconfig.QueueName {
 	return s.queueName
 }
 
 func (s *Service) PopFromTheQueue(
-	item item.Universal,
+	item queueitem.Universal,
 	destination queue2.Service,
 ) error {
 	if destination == nil {
@@ -58,7 +58,7 @@ func (s *Service) PopFromTheQueue(
 	return err
 }
 
-func (s *Service) PushToTheQueue(item item.Universal) error {
+func (s *Service) PushToTheQueue(item queueitem.Universal) error {
 	err := s.Hub.SendMessage(item)
 	return err
 }
@@ -97,6 +97,6 @@ func (s *Service) StopQueue(callback queue2.StopCallback) error {
 	return nil
 }
 
-func (s *Service) InsertMessage(item item.Universal) error {
+func (s *Service) InsertMessage(item queueitem.Universal) error {
 	return s.PushToTheQueue(item)
 }

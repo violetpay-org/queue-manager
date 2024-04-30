@@ -12,15 +12,15 @@ import (
 
 // Service for test and TestQueueOperator
 type Service struct {
-	queueName config.QueueName
+	queueName queuemanagerconfig.QueueName
 	isStopped chan bool
 	queue     memory.PubSubQueue
 }
 
 func NewMemoryQueueService(
-	queueName config.QueueName,
+	queueName queuemanagerconfig.QueueName,
 	maxItems int,
-) (queue.Service, queue.ILowLevelQueueOperator) {
+) (innerqueue.Service, innerqueue.ILowLevelQueueOperator) {
 	queue := &Service{
 		queueName: queueName,
 		isStopped: make(chan bool),
@@ -30,12 +30,12 @@ func NewMemoryQueueService(
 	return queue, queue
 }
 
-func (s *Service) GetQueueName() config.QueueName {
+func (s *Service) GetQueueName() queuemanagerconfig.QueueName {
 	return s.queueName
 }
 
 func (s *Service) PushToTheQueue(
-	item item.Universal,
+	item queueitem.Universal,
 ) error {
 	err := s.queue.PushToTheQueue(item)
 	if err != nil {
@@ -46,7 +46,7 @@ func (s *Service) PushToTheQueue(
 }
 
 func (s *Service) StopQueue(
-	callback queue.StopCallback,
+	callback innerqueue.StopCallback,
 ) error {
 	fmt.Println(fmt.Sprintf("Stopping %s queue", s.GetQueueName()))
 	s.isStopped <- true
@@ -55,7 +55,7 @@ func (s *Service) StopQueue(
 }
 
 func (s *Service) StartQueue(
-	onConsume queue.ConsumeCallback,
+	onConsume innerqueue.ConsumeCallback,
 	waitGroup *sync.WaitGroup,
 	ctx *context.Context,
 ) error {
@@ -74,6 +74,6 @@ func (s *Service) StartQueue(
 	return nil
 }
 
-func (s *Service) InsertMessage(item item.Universal) error {
+func (s *Service) InsertMessage(item queueitem.Universal) error {
 	return s.PushToTheQueue(item)
 }

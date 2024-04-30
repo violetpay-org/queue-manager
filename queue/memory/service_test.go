@@ -8,7 +8,7 @@ import (
 )
 
 func TestMemoryQueueService(t *testing.T) {
-	testQueueName, err := config.RegisterQueueName("test_queue", 1)
+	testQueueName, err := queuemanagerconfig.RegisterQueueName("test_queue", 1)
 
 	if err != nil {
 		t.Error(err)
@@ -25,6 +25,6 @@ func TestMemoryQueueService(t *testing.T) {
 
 	t.Run(
 		"Test memory queue service and operator",
-		func(t *testing.T) { queue.ServiceTestSuite(t, queueService, queueOperator) },
+		func(t *testing.T) { innerqueue.ServiceTestSuite(t, queueService, queueOperator) },
 	)
 }

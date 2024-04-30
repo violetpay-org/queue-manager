@@ -18,9 +18,9 @@ import (
 func TestConsumerAndProducer(t *testing.T) {
 	ctx := context.Background()
 
-	config := config.NewKafkaConfig(
-		config.SetKafkaTopic(config.TestKafkaQueueName),
-		config.AddKafkaBrokers(config.TestKafkaBrokers),
+	config := queuemanagerconfig.NewKafkaConfig(
+		queuemanagerconfig.SetKafkaTopic(queuemanagerconfig.TestKafkaQueueName),
+		queuemanagerconfig.AddKafkaBrokers(queuemanagerconfig.TestKafkaBrokers),
 	)
 
 	hub := queuemanager.NewKafkaHub(
@@ -82,7 +82,7 @@ func (q *TestQueueItem) QueueItemToString() (string, error) {
 type TestKafkaMessageSerializer struct{}
 
 func (p *TestKafkaMessageSerializer) QueueItemToProducerMessage(
-	item item.Universal,
+	item queueitem.Universal,
 	topic string,
 ) (*sarama.ProducerMessage, error) {
 	parsedItem, err := item.QueueItemToJSON()
@@ -101,7 +101,7 @@ func (p *TestKafkaMessageSerializer) QueueItemToProducerMessage(
 
 func (p *TestKafkaMessageSerializer) ConsumerMessageToQueueItem(
 	message *sarama.ConsumerMessage,
-) (item.Universal, error) {
+) (queueitem.Universal, error) {
 
 	purchaseQueueItem := &TestQueueItem{}
 
@@ -124,7 +124,7 @@ type TestKafkaConsumeCallback struct {
 
 // TestKafkaConsumeCallback
 // Used to test the consumer when it consumes a message
-func (s *TestKafkaConsumeCallback) OnConsumed(message item.Universal) {
+func (s *TestKafkaConsumeCallback) OnConsumed(message queueitem.Universal) {
 	s.t.Run("KafkaConsumeMessageTest", func(t *testing.T) {
 
 		value, err := message.QueueItemToString()

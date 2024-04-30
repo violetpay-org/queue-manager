@@ -15,30 +15,30 @@ type Args struct {
 	NumOfPartitions int
 	Brokers         []string
 	PublishOnly     bool
-	Serializer      item.KafkaSerializer
-	QueueName       config.QueueName
+	Serializer      queueitem.KafkaSerializer
+	QueueName       queuemanagerconfig.QueueName
 	Logger          func(string)
 }
 
 type Service struct {
 	Hub       *kafka.Hub
-	queueName config.QueueName
+	queueName queuemanagerconfig.QueueName
 }
 
 func NewQueue(
 	args Args,
 ) (queue2.Service, queue2.ILowLevelQueueOperator, error) {
 
-	opts := []config.KafkaOpts{config.SetKafkaTopic(args.QueueName.String())}
+	opts := []queuemanagerconfig.KafkaOpts{queuemanagerconfig.SetKafkaTopic(args.QueueName.String())}
 	for _, broker := range args.Brokers {
-		opts = append(opts, config.AddKafkaBroker(broker))
+		opts = append(opts, queuemanagerconfig.AddKafkaBroker(broker))
 	}
 
 	hub := kafka.NewHub(
 		args.NumOfPartitions,
 		args.Serializer,
 		args.PublishOnly,
-		config.NewKafkaConfig(opts...), // with default config
+		queuemanagerconfig.NewKafkaConfig(opts...), // with default config
 		args.Logger,
 	)
 
@@ -50,12 +50,12 @@ func NewQueue(
 	return queueService, queueService, nil
 }
 
-func (o *Service) GetQueueName() config.QueueName {
+func (o *Service) GetQueueName() queuemanagerconfig.QueueName {
 	return o.queueName
 }
 
 func (o *Service) PopFromTheQueue(
-	item item.Universal,
+	item queueitem.Universal,
 	destination queue2.Service,
 ) error {
 	if destination == nil {
@@ -67,7 +67,7 @@ func (o *Service) PopFromTheQueue(
 }
 
 func (o *Service) PushToTheQueue(
-	item item.Universal,
+	item queueitem.Universal,
 ) error {
 	consumer := o.Hub.GetRandomConsumer()
 
@@ -109,6 +109,6 @@ func (o *Service) StopQueue(callback queue2.StopCallback) error {
 	return nil
 }
 
-func (o *Service) InsertMessage(item item.Universal) error {
+func (o *Service) InsertMessage(item queueitem.Universal) error {
 	return o.PushToTheQueue(item)
 }

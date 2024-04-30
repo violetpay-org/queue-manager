@@ -1,4 +1,4 @@
-package config
+package queuemanagerconfig
 
 import (
 	"github.com/IBM/sarama"

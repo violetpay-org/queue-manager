@@ -4,21 +4,21 @@ import "github.com/violetpay-org/queuemanager/item"
 
 type PubSubQueue struct {
 	maxItems int
-	storage  chan item.Universal
+	storage  chan queueitem.Universal
 }
 
 func NewPubSubQueue(maxItems int) *PubSubQueue {
 	return &PubSubQueue{
 		maxItems: maxItems,
-		storage:  make(chan item.Universal, maxItems),
+		storage:  make(chan queueitem.Universal, maxItems),
 	}
 }
 
-func (q *PubSubQueue) PushToTheQueue(item item.Universal) error {
+func (q *PubSubQueue) PushToTheQueue(item queueitem.Universal) error {
 	q.storage <- item
 	return nil
 }
 
-func (q *PubSubQueue) GetStorage() chan item.Universal {
+func (q *PubSubQueue) GetStorage() chan queueitem.Universal {
 	return q.storage
 }

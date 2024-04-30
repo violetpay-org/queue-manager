@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	"github.com/violetpay-org/queuemanager/config"
+	queuemanagerconfig "github.com/violetpay-org/queuemanager/config"
 	"github.com/violetpay-org/queuemanager/item"
 	"github.com/violetpay-org/queuemanager/queue"
 	"sync"
@@ -13,7 +13,7 @@ import (
 )
 
 type Hub struct {
-	messageSerializer item.RedisSerializer
+	messageSerializer queueitem.RedisSerializer
 	cluster           *redisqueue.SafeQueue
 	logger            func(string)
 	paused            chan bool
@@ -22,8 +22,8 @@ type Hub struct {
 }
 
 func NewHub(
-	messageSerializer item.RedisSerializer,
-	config *config.RedisConfig,
+	messageSerializer queueitem.RedisSerializer,
+	config *queuemanagerconfig.RedisConfig,
 	logger func(string),
 ) *Hub {
 	hub := &Hub{
@@ -41,8 +41,8 @@ func NewHub(
 }
 
 func (h *Hub) init(
-	messageSerializer item.RedisSerializer,
-	config *config.RedisConfig,
+	messageSerializer queueitem.RedisSerializer,
+	config *queuemanagerconfig.RedisConfig,
 	logger func(string),
 ) {
 	h.messageSerializer = messageSerializer
@@ -87,7 +87,7 @@ func (h *Hub) IsPrepared() bool {
 	return h.isPrepared
 }
 
-func (h *Hub) SendMessage(item item.Universal) error {
+func (h *Hub) SendMessage(item queueitem.Universal) error {
 
 	message, err := h.messageSerializer.QueueItemToRedisMessage(item)
 
@@ -99,7 +99,7 @@ func (h *Hub) SendMessage(item item.Universal) error {
 }
 
 func (h *Hub) StartConsumeAll(
-	onConsume queue.ConsumeCallback,
+	onConsume innerqueue.ConsumeCallback,
 	waitGroup *sync.WaitGroup,
 	ctx *context.Context,
 ) {

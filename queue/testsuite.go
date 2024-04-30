@@ -1,4 +1,4 @@
-package queue
+package innerqueue
 
 import (
 	"context"
@@ -17,7 +17,7 @@ func ServiceTestSuite(
 	queueService Service,
 	queueOperator ILowLevelQueueOperator,
 ) {
-	queueItem := item.NewTestQueueItem()
+	queueItem := queueitem.NewTestQueueItem()
 
 	wg := sync.WaitGroup{}
 	context := context.Background()
@@ -113,7 +113,7 @@ type consumptionTestCallback struct {
 	consumed bool
 }
 
-func (c *consumptionTestCallback) OnConsumed(queueItem item.Universal) {
+func (c *consumptionTestCallback) OnConsumed(queueItem queueitem.Universal) {
 	if queueItem == nil {
 		c.t.Errorf("Expected an item, but received nil")
 	}

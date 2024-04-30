@@ -1,4 +1,4 @@
-package item_test
+package queueitem_test
 
 import (
 	"encoding/json"
@@ -73,7 +73,7 @@ func TestQueueItemMakerServiceTest(t *testing.T) {
 
 	serializer := testObjectSerializer{} // Update the type to match the inferred type
 
-	queueItem := item.MakeQueueItemWithSerializer[testObject](testItem, &serializer)
+	queueItem := queueitem.MakeQueueItemWithSerializer[testObject](testItem, &serializer)
 
 	jsonMadeByQueueItem, err := queueItem.QueueItemToJSON()
 

@@ -1,4 +1,4 @@
-package item
+package queueitem
 
 import (
 	"encoding/json"

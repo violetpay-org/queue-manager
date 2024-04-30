@@ -9,8 +9,8 @@ import (
 
 // NewRedisHub is a function that returns a new Hub.
 func NewRedisHub(
-	messageSerializer item.RedisSerializer,
-	config *config.RedisConfig,
+	messageSerializer queueitem.RedisSerializer,
+	config *queuemanagerconfig.RedisConfig,
 	logger func(string),
 ) *redis.Hub {
 	return redis.NewHub(
@@ -24,9 +24,9 @@ func NewRedisHub(
 // maxConsumerCount is the maximum number of consumers that can be created.
 func NewKafkaHub(
 	maxConsumerCount int,
-	messageSerializer item.KafkaSerializer,
+	messageSerializer queueitem.KafkaSerializer,
 	publishOnly bool,
-	config *config.KafkaConfig,
+	config *queuemanagerconfig.KafkaConfig,
 	logger func(string),
 ) *kafka.Hub {
 	return kafka.NewHub(

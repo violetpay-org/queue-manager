@@ -14,7 +14,7 @@ type testItem struct {
 }
 
 func TestRedisQueueService(t *testing.T) {
-	testQueueName, err := config.RegisterQueueName("test_queue", 1)
+	testQueueName, err := queuemanagerconfig.RegisterQueueName("test_queue", 1)
 	testBrokers := []string{"redis.vp-datacenter-1.violetpay.net:6379"}
 
 	if err != nil {
@@ -23,7 +23,7 @@ func TestRedisQueueService(t *testing.T) {
 
 	queueService, queueOperator, err := redisqueue.NewQueue(
 		redisqueue.Args{
-			MessageSerializer: item.NewRedisSerializer(reflect.TypeOf(testItem{})),
+			MessageSerializer: queueitem.NewRedisSerializer(reflect.TypeOf(testItem{})),
 			QueueName:         testQueueName,
 			Logger:            func(string) {},
 			Brokers:           testBrokers,
@@ -36,6 +36,6 @@ func TestRedisQueueService(t *testing.T) {
 
 	t.Run(
 		"Test Redis queue service and operator",
-		func(t *testing.T) { queue.ServiceTestSuite(t, queueService, queueOperator) },
+		func(t *testing.T) { innerqueue.ServiceTestSuite(t, queueService, queueOperator) },
 	)
 }

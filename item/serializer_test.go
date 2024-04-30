@@ -1,4 +1,4 @@
-package item_test
+package queueitem_test
 
 import (
 	"github.com/IBM/sarama"
@@ -14,9 +14,9 @@ type testItem struct {
 }
 
 func TestOpenBankingKafkaMessageSerializer(t *testing.T) {
-	serializer := item.NewKafkaSerializer(reflect.TypeOf(testItem{}))
-	queueItem := item.MakeQueueItem(testItem{Item: "test"})
-	testQueueName, err := config.RegisterQueueName("test", 0)
+	serializer := queueitem.NewKafkaSerializer(reflect.TypeOf(testItem{}))
+	queueItem := queueitem.MakeQueueItem(testItem{Item: "test"})
+	testQueueName, err := queuemanagerconfig.RegisterQueueName("test", 0)
 
 	if err != nil {
 		t.Error(err)

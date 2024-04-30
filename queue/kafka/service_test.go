@@ -14,7 +14,7 @@ type testItem struct {
 }
 
 func TestKafkaQueueService(t *testing.T) {
-	testQueueName, err := config.RegisterQueueName("test_queue", 1)
+	testQueueName, err := queuemanagerconfig.RegisterQueueName("test_queue", 1)
 	testBrokers := []string{"kafka.vp-datacenter-1.violetpay.net:9092", "kafka.vp-datacenter-1.violetpay.net:9093"}
 
 	if err != nil {
@@ -25,7 +25,7 @@ func TestKafkaQueueService(t *testing.T) {
 		kafkaqueue.Args{
 			NumOfPartitions: 1,
 			Brokers:         testBrokers,
-			Serializer:      item.NewKafkaSerializer(reflect.TypeOf(testItem{})),
+			Serializer:      queueitem.NewKafkaSerializer(reflect.TypeOf(testItem{})),
 			QueueName:       testQueueName,
 			Logger:          func(string) {},
 		},
@@ -37,6 +37,6 @@ func TestKafkaQueueService(t *testing.T) {
 
 	t.Run(
 		"Test Kafka queue service and operator",
-		func(t *testing.T) { queue.ServiceTestSuite(t, queueService, queueOperator) },
+		func(t *testing.T) { innerqueue.ServiceTestSuite(t, queueService, queueOperator) },
 	)
 }

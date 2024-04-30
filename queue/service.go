@@ -1,4 +1,4 @@
-package queue
+package innerqueue
 
 import (
 	"context"
@@ -8,10 +8,10 @@ import (
 )
 
 type Service interface {
-	GetQueueName() config.QueueName
+	GetQueueName() queuemanagerconfig.QueueName
 
 	PushToTheQueue(
-		item item.Universal,
+		item queueitem.Universal,
 	) error
 }
 
@@ -29,5 +29,5 @@ type ILowLevelQueueOperator interface {
 	) error
 
 	// This behavior is repeated IQueueService.PushToTheQueue
-	InsertMessage(item item.Universal) error
+	InsertMessage(item queueitem.Universal) error
 }

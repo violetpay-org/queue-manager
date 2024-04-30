@@ -16,8 +16,8 @@ type Hub struct {
 	consumers         map[int]*Consumer // map of consumer id to consumer
 	availID           chan int          // channel of available consumer ids
 	consumersMax      int               // maximum number of consumers
-	messageSerializer item.KafkaSerializer
-	config            *config.KafkaConfig
+	messageSerializer queueitem.KafkaSerializer
+	config            *queuemanagerconfig.KafkaConfig
 	logger            func(string)
 	publishOnly       bool // whether the hub is for publishing only
 	isRunning         bool // whether the hub is running
@@ -26,9 +26,9 @@ type Hub struct {
 
 func NewHub(
 	maxConsumerCount int,
-	messageSerializer item.KafkaSerializer,
+	messageSerializer queueitem.KafkaSerializer,
 	publishOnly bool,
-	config *config.KafkaConfig,
+	config *queuemanagerconfig.KafkaConfig,
 	logger func(string),
 ) *Hub {
 	hub := &Hub{}
@@ -45,9 +45,9 @@ func NewHub(
 
 func (h *Hub) Init(
 	maxConsumerCount int,
-	messageSerializer item.KafkaSerializer,
+	messageSerializer queueitem.KafkaSerializer,
 	publishOnly bool,
-	config *config.KafkaConfig,
+	config *queuemanagerconfig.KafkaConfig,
 	logger func(string),
 ) {
 	h.consumersMax = maxConsumerCount
@@ -148,7 +148,7 @@ func (h *Hub) MakeNewConsumer(ctx *context.Context) *Consumer {
 }
 
 func (h *Hub) StartConsumeAll(
-	callback queue.ConsumeCallback,
+	callback innerqueue.ConsumeCallback,
 	waitGroup *sync.WaitGroup,
 	ctx *context.Context,
 ) {
@@ -165,7 +165,7 @@ func (h *Hub) StartConsumeAll(
 }
 
 func (h *Hub) SendMessage(
-	item item.Universal,
+	item queueitem.Universal,
 	topic string,
 	consumerId int,
 ) error {
