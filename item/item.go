@@ -1,6 +1,6 @@
-package qmanitem
+package queueitem
 
-type IQueueItem interface {
+type Universal interface {
 	QueueItemToString() (string, error)
 	QueueItemToJSON() (string, error)
 }

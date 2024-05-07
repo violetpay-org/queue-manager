@@ -1,12 +1,15 @@
-package quman
+package queuemanager
 
-import qmanservices "github.com/violetpay-org/point3-quman/services"
+import (
+	"github.com/violetpay-org/queuemanager/config"
+	"github.com/violetpay-org/queuemanager/queue"
+)
 
 type Queue struct {
-	QueueService          qmanservices.IQueueService
-	LowLevelQueueOperator qmanservices.ILowLevelQueueOperator
-	ConsumeCallback       qmanservices.QueueConsumeCallback
-	StopCallback          qmanservices.QueueStopCallback
+	QueueService          innerqueue.Service
+	LowLevelQueueOperator innerqueue.ILowLevelQueueOperator
+	ConsumeCallback       innerqueue.ConsumeCallback
+	StopCallback          innerqueue.StopCallback
 }
 
-type QueueSet map[qmanservices.QueueName]*Queue
+type QueueSet map[queuemanagerconfig.QueueName]*Queue
