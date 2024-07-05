@@ -1,9 +1,9 @@
 package memoryqueue_test
 
 import (
-	"github.com/violetpay-org/queuemanager/config"
-	"github.com/violetpay-org/queuemanager/queue"
-	memoryqueue "github.com/violetpay-org/queuemanager/queue/memory"
+	queuemanagerconfig "github.com/violetpay-org/queue-manager/config"
+	innerqueue "github.com/violetpay-org/queue-manager/queue"
+	memoryqueue "github.com/violetpay-org/queue-manager/queue/memory"
 	"testing"
 )
 

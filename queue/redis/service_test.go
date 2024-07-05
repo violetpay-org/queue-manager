@@ -1,10 +1,10 @@
 package redisqueue_test
 
 import (
-	"github.com/violetpay-org/queuemanager/config"
-	"github.com/violetpay-org/queuemanager/item"
-	"github.com/violetpay-org/queuemanager/queue"
-	redisqueue "github.com/violetpay-org/queuemanager/queue/redis"
+	"github.com/violetpay-org/queue-manager/config"
+	"github.com/violetpay-org/queue-manager/item"
+	"github.com/violetpay-org/queue-manager/queue"
+	redisqueue "github.com/violetpay-org/queue-manager/queue/redis"
 	"reflect"
 	"testing"
 )

@@ -2,11 +2,11 @@ package redisqueue
 
 import (
 	"context"
-	"github.com/violetpay-org/queuemanager/config"
-	"github.com/violetpay-org/queuemanager/internal/queue/redis"
-	"github.com/violetpay-org/queuemanager/internal/queueerror"
-	"github.com/violetpay-org/queuemanager/item"
-	queue2 "github.com/violetpay-org/queuemanager/queue"
+	"github.com/violetpay-org/queue-manager/config"
+	"github.com/violetpay-org/queue-manager/internal/queue/redis"
+	"github.com/violetpay-org/queue-manager/internal/queueerror"
+	"github.com/violetpay-org/queue-manager/item"
+	queue2 "github.com/violetpay-org/queue-manager/queue"
 	"sync"
 )
 

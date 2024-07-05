@@ -3,9 +3,9 @@ package kafka
 import (
 	"context"
 	"fmt"
-	"github.com/violetpay-org/queuemanager/config"
-	"github.com/violetpay-org/queuemanager/item"
-	"github.com/violetpay-org/queuemanager/queue"
+	"github.com/violetpay-org/queue-manager/config"
+	"github.com/violetpay-org/queue-manager/item"
+	"github.com/violetpay-org/queue-manager/queue"
 	"sync"
 
 	"github.com/IBM/sarama"

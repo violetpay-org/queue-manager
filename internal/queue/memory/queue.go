@@ -1,6 +1,6 @@
 package memory
 
-import "github.com/violetpay-org/queuemanager/item"
+import "github.com/violetpay-org/queue-manager/item"
 
 type PubSubQueue struct {
 	maxItems int

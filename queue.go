@@ -1,8 +1,8 @@
 package queuemanager
 
 import (
-	"github.com/violetpay-org/queuemanager/config"
-	"github.com/violetpay-org/queuemanager/queue"
+	queuemanagerconfig "github.com/violetpay-org/queue-manager/config"
+	innerqueue "github.com/violetpay-org/queue-manager/queue"
 )
 
 type Queue struct {

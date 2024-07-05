@@ -1,10 +1,10 @@
 package kafkaqueue_test
 
 import (
-	"github.com/violetpay-org/queuemanager/config"
-	"github.com/violetpay-org/queuemanager/item"
-	"github.com/violetpay-org/queuemanager/queue"
-	kafkaqueue "github.com/violetpay-org/queuemanager/queue/kafka"
+	"github.com/violetpay-org/queue-manager/config"
+	"github.com/violetpay-org/queue-manager/item"
+	"github.com/violetpay-org/queue-manager/queue"
+	kafkaqueue "github.com/violetpay-org/queue-manager/queue/kafka"
 	"reflect"
 	"testing"
 )

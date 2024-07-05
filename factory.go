@@ -2,9 +2,9 @@ package queuemanager
 
 import (
 	"context"
-	"github.com/violetpay-org/queuemanager/config"
-	"github.com/violetpay-org/queuemanager/internal/queueerror"
-	innerqueue "github.com/violetpay-org/queuemanager/queue"
+	queuemanagerconfig "github.com/violetpay-org/queue-manager/config"
+	"github.com/violetpay-org/queue-manager/internal/queueerror"
+	innerqueue "github.com/violetpay-org/queue-manager/queue"
 	"sync"
 )
 

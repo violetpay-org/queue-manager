@@ -2,7 +2,7 @@ package queueitem_test
 
 import (
 	"encoding/json"
-	"github.com/violetpay-org/queuemanager/item"
+	"github.com/violetpay-org/queue-manager/item"
 	"testing"
 )
 

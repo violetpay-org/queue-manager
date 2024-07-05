@@ -1,10 +1,10 @@
 package queuemanager
 
 import (
-	"github.com/violetpay-org/queuemanager/config"
-	"github.com/violetpay-org/queuemanager/internal/queue/kafka"
-	"github.com/violetpay-org/queuemanager/internal/queue/redis"
-	"github.com/violetpay-org/queuemanager/item"
+	queuemanagerconfig "github.com/violetpay-org/queue-manager/config"
+	"github.com/violetpay-org/queue-manager/internal/queue/kafka"
+	"github.com/violetpay-org/queue-manager/internal/queue/redis"
+	queueitem "github.com/violetpay-org/queue-manager/item"
 )
 
 // NewRedisHub is a function that returns a new Hub.

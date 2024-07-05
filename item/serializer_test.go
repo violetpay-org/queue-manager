@@ -2,8 +2,8 @@ package queueitem_test
 
 import (
 	"github.com/IBM/sarama"
-	"github.com/violetpay-org/queuemanager/config"
-	"github.com/violetpay-org/queuemanager/item"
+	"github.com/violetpay-org/queue-manager/config"
+	"github.com/violetpay-org/queue-manager/item"
 	"reflect"
 	"testing"
 	"time"

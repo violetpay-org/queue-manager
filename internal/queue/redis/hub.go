@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	queuemanagerconfig "github.com/violetpay-org/queuemanager/config"
-	"github.com/violetpay-org/queuemanager/item"
-	"github.com/violetpay-org/queuemanager/queue"
+	queuemanagerconfig "github.com/violetpay-org/queue-manager/config"
+	queueitem "github.com/violetpay-org/queue-manager/item"
+	innerqueue "github.com/violetpay-org/queue-manager/queue"
 	"sync"
 
 	redisqueue "github.com/asheswook/redis-queue"

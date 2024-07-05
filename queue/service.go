@@ -2,8 +2,8 @@ package innerqueue
 
 import (
 	"context"
-	"github.com/violetpay-org/queuemanager/config"
-	"github.com/violetpay-org/queuemanager/item"
+	"github.com/violetpay-org/queue-manager/config"
+	"github.com/violetpay-org/queue-manager/item"
 	"sync"
 )
 

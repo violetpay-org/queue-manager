@@ -1,4 +1,4 @@
-module github.com/violetpay-org/queuemanager
+module github.com/violetpay-org/queue-manager
 
 go 1.19
 

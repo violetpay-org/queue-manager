@@ -1,7 +1,7 @@
 package queuemanagerconfig
 
 import (
-	"github.com/violetpay-org/queuemanager/internal/queueerror"
+	"github.com/violetpay-org/queue-manager/internal/queueerror"
 )
 
 // QueueName is an enumeration of the different queues that the service can use.

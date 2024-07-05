@@ -3,7 +3,7 @@ package innerqueue
 import (
 	"context"
 	"encoding/json"
-	"github.com/violetpay-org/queuemanager/item"
+	"github.com/violetpay-org/queue-manager/item"
 	"sync"
 	"testing"
 	"time"
